@@ -10,7 +10,9 @@ pipeline {
         
         stage('Build') {
             steps {
-                echo 'Running tests...'
+                sh  '''
+                    sh init-cowsay.sh 8081 
+                    '''
             }
         }
         
