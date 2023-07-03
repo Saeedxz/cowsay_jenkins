@@ -1,6 +1,8 @@
 pipeline {
     agent any
-    
+    triggers {
+                 GenericTrigger causeString: 'Generic Cause', regexpFilterExpression: '', regexpFilterText: '', token: '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', tokenCredentialId: 'toc'
+             }
     stages {
         stage('Checkout') {
             steps {
