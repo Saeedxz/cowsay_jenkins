@@ -1,37 +1,60 @@
 pipeline {
     agent any
-    triggers {
-  GenericTrigger causeString: 'Generic Cause', regexpFilterExpression: '', regexpFilterText: '', token: 'test', tokenCredentialId: 'secret_github'
-}
+
+    parameters {
+        string(name: 'PORT', defaultValue: '8081', description: 'Port number to expose')
+    }
 
     stages {
         stage('Checkout') {
             steps {
-                checkout scmGit(branches: [[name: '*/master']], extensions: [], userRemoteConfigs: [[credentialsId: 'github', url: 'git@github.com:Saeedxz/cowsay_jenkins.git']])
-            }
+                checkout scmGit(branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[credentialsId: 'gilabb', url: 'http://gitlab/Saeed/versioned-cowsay.git']])            }
         }
-        
-        stage('Build') {
+
+        stage('Run Docker Container') {
             steps {
-                sh  '''
-                    sh init-cowsay.sh 8081 
-                    '''
+                sh " sh init-cowsay.sh ${params.PORT}"
             }
         }
-        
+
         stage('Test') {
             steps {
-                // Run tests for your application
-                // Example: mvn test
-                echo 'Running tests...'
+                script {
+                    def status = sh(
+                        script: "./test.sh",
+                        returnStatus: true
+                    )
+                    
+                    if (status == 0) {
+                        echo 'Cowsay web app check passed'
+                    } else {
+                        error 'Cowsay web app check failed'
+                    }
+                }
             }
         }
-        
+
         stage('Deploy') {
             steps {
-                // Deploy your application to a target environment
-                // Example: deploy to production
-                echo 'Deploying the application...'
+                echo 'deploy ...'
+            }
+        }
+
+    }
+
+    post {
+        always {
+            // Cleanup stage
+            
+            script {
+                // Run your script here
+                sh  '''
+                        # Kill all running containers
+                        docker kill $(docker ps -q)
+
+                        # Delete stopped containers, volumes, and networks that are not used by containers
+                        docker system prune -af
+                    '''
             }
         }
     }
