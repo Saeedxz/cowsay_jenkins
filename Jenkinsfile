@@ -21,7 +21,9 @@ pipeline {
             steps {
                 script {
                     def status = sh(
-                        script: "./test.sh",
+                        script: """ sleep 5
+                                    sh test.sh ${params.PORT}
+                                """,
                         returnStatus: true
                     )
                     
@@ -50,7 +52,7 @@ pipeline {
                 // Run your script here
                 sh  '''
                         # Kill all running containers
-                        docker kill $(docker ps -q)
+                        docker kill cowsay
 
                         # Delete stopped containers, volumes, and networks that are not used by containers
                         docker system prune -af
@@ -58,4 +60,5 @@ pipeline {
             }
         }
     }
+
 }

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-app_url="http://0.0.0.0:$1"
+app_url="http://host.docker.internal:$1"
 
 response=$(curl -s -o /dev/null -w "%{http_code}" "$app_url")
 
